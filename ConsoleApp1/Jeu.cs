@@ -3,7 +3,7 @@ using System;
 
 namespace motGlisse
 {
-    internal class Jeu
+    public class Jeu
     {
         private Dictionnaire dico;
         private Plateau plateau;

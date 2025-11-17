@@ -2,7 +2,7 @@
 
 namespace motGlisse
 {
-    internal class Joueur
+    public class Joueur
     {
         private string nom;
         private List<string> motsTrouves;

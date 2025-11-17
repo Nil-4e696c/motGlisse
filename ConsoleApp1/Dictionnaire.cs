@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace motGlisse
 {
-    internal class Dictionnaire
+    public class Dictionnaire
     {
         private List<string>[] tabMotsParLettre;
 

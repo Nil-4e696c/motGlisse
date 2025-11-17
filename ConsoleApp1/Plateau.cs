@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace motGlisse
 {
-    internal class Plateau
+    public class Plateau
     {
         private char[,] grille;
         private int nbLignes;
