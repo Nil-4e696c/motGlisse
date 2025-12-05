@@ -1,5 +1,5 @@
 ﻿using System;
-using motGlisse;
+using System.IO;
 
 namespace motGlisse
 {
@@ -7,12 +7,23 @@ namespace motGlisse
     {
         static void Main(string[] args)
         {
-            var j = new Joueur("Maxence");
-            j.Add_Mot("maison");
-            j.Add_Mot("MAISON");
-            j.Add_Score(10);
+            Console.OutputEncoding = System.Text.Encoding.UTF8;
 
-            Console.WriteLine(j.toString());
+            try
+            {
+                Jeu jeu = new Jeu();
+                jeu.Demarrer();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("\n=== ERREUR FATALE ===");
+                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.StackTrace);
+            }
+
+            Console.WriteLine("\nAppuyez sur une touche pour fermer...");
+            Console.ReadKey();
         }
     }
 }
+
