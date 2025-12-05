@@ -1,5 +1,5 @@
-﻿using ConsoleApp1;
-using System;
+﻿using System;
+using motGlisse;
 
 namespace motGlisse
 {
@@ -7,8 +7,12 @@ namespace motGlisse
     {
         static void Main(string[] args)
         {
-            Jeu jeu = new Jeu();
-            jeu.Demarrer();
+            var j = new Joueur("Maxence");
+            j.Add_Mot("maison");
+            j.Add_Mot("MAISON");
+            j.Add_Score(10);
+
+            Console.WriteLine(j.toString());
         }
     }
 }

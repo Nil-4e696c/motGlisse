@@ -1,15 +1,16 @@
-﻿using ConsoleApp1;
-using System;
+﻿using System;
+using motGlisse; // ✔ ton vrai namespace
+// ❌ using ConsoleApp1; à supprimer
 
 namespace motGlisse
 {
     public class Jeu
     {
         private Dictionnaire dico;
-        private Plateau plateau;
+        private Plateau? plateau;     // ✔ autorisé à être null au lancement
 
-        private Joueur joueur1;
-        private Joueur joueur2;
+        private Joueur? joueur1;      // ✔ idem
+        private Joueur? joueur2;
 
         private int dureeTour = 30;
         private int dureePartie = 120;
@@ -17,6 +18,8 @@ namespace motGlisse
         public Jeu()
         {
             dico = new Dictionnaire();
+            // plateau, joueur1, joueur2 seront initialisés PLUS TARD,
+            // donc on les laisse null pour l'instant.
         }
 
         public void Demarrer()
@@ -28,24 +31,24 @@ namespace motGlisse
 
         private void InitialiserJoueurs()
         {
-            // À compléter
+            // À compléter plus tard
         }
 
         private void MenuPrincipal()
         {
-            // À compléter
+            // À compléter plus tard
         }
 
         private void ChargerDictionnaire()
         {
-            // dico.ToRead();
+            // dico.ToRead("MotsFrancais.txt");
             // dico.Tri_XXX();
         }
 
         private void ChargerPlateauDepuisFichier()
         {
             // plateau = new Plateau();
-            // plateau.ToRead();
+            // plateau.ToRead("monFichier.csv");
         }
 
         private void GenererPlateauAleatoire()
@@ -56,12 +59,12 @@ namespace motGlisse
 
         private void LancerPartie()
         {
-            // boucle de jeu
+            // boucle principale du jeu
         }
 
         private void LancerTour(Joueur joueur)
         {
-            // recherche mot, validation, scoring, maj plateau
+            // gestion d'un tour
         }
     }
 }
