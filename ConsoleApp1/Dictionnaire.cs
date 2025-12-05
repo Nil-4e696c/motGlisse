@@ -21,11 +21,11 @@ namespace motGlisse
             {
                 string ligne = lignes[i];
                 string[] mots = ligne.Split(' ');
-                foreach(string mot in mots)
+                foreach (string mot in mots)
                 {
                     if (mot != "")
                     {
-                        tabMotsParLettre[i].Add(mot);
+                        tabMotsParLettre[i].Add(mot); 
                     }
                 }
             }
