@@ -16,12 +16,29 @@ namespace motGlisse
 
         public void ToRead(string nomFichier)
         {
+            string[] lignes = File.ReadAllLines(nomFichier);
+            for (int i = 0; i < lignes.Length && i < 26; i++)
+            {
+                string ligne = lignes[i];
+                string[] mots = ligne.Split(' ');
+                foreach(string mot in mots)
+                {
+                    if (mot != "")
+                    {
+                        tabMotsParLettre[i].Add(mot);
+                    }
+                }
+            }
             // lire fichier et remplir tabMotsParLettre
         }
 
         public void Tri_XXX()
         {
-            // quicksort / fusion
+            for(int i = 0; i < 26; i++)
+            {
+                tabMotsParLettre[i].Sort();
+                // trier tabMotsParLettre[i] avec XXX
+            }
         }
 
         public bool RechDichoRecursif(string mot)
