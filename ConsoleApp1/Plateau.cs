@@ -7,23 +7,20 @@ namespace motGlisse
 {
     public class Plateau
     {
-        private const int TAILLE_LIGNES = 8;
-        private const int TAILLE_COLONNES = 8;
-
         private char[,] grille;
         private int nbLignes;
         private int nbColonnes;
 
         // Poids des lettres (chargés depuis Lettres.txt)
-        private static Dictionary<char, int> poidsLettres = new Dictionary<char, int>();
+        private static readonly Dictionary<char, int> poidsLettres = new Dictionary<char, int>();
 
-        // Random unique pour tout le programme (exigence du sujet)
+        // Random unique pour tout le programme
         private static readonly Random rand = new Random();
 
         public Plateau()
         {
-            nbLignes = TAILLE_LIGNES;
-            nbColonnes = TAILLE_COLONNES;
+            nbLignes = 8;
+            nbColonnes = 8;
             grille = new char[nbLignes, nbColonnes];
         }
 
@@ -37,7 +34,6 @@ namespace motGlisse
             grille = new char[nbLignes, nbColonnes];
         }
 
-        // Propriétés si besoin
         public int NbLignes => nbLignes;
         public int NbColonnes => nbColonnes;
         public char[,] Grille => grille;
@@ -50,14 +46,14 @@ namespace motGlisse
             string[] lignes = File.ReadAllLines(fichier);
 
             nbLignes = lignes.Length;
-            string[] first = lignes[0].Split(';');
+            string[] first = lignes[0].Split(';', StringSplitOptions.None);
             nbColonnes = first.Length;
 
             grille = new char[nbLignes, nbColonnes];
 
             for (int i = 0; i < nbLignes; i++)
             {
-                string[] parts = lignes[i].Split(';');
+                string[] parts = lignes[i].Split(';', StringSplitOptions.None);
                 for (int j = 0; j < nbColonnes; j++)
                 {
                     if (j < parts.Length && !string.IsNullOrWhiteSpace(parts[j]))
@@ -66,6 +62,26 @@ namespace motGlisse
                         grille[i, j] = ' ';
                 }
             }
+        }
+
+        public void ToFile(string fichier)
+        {
+            string[] lignes = new string[nbLignes];
+
+            for (int i = 0; i < nbLignes; i++)
+            {
+                string[] parts = new string[nbColonnes];
+                for (int j = 0; j < nbColonnes; j++)
+                {
+                    char c = grille[i, j];
+                    if (c == '\0') c = ' ';
+                    parts[j] = c.ToString();
+                }
+
+                lignes[i] = string.Join(";", parts);
+            }
+
+            File.WriteAllLines(fichier, lignes);
         }
 
         // -------------------------------------------------
@@ -77,9 +93,8 @@ namespace motGlisse
                 throw new ArgumentException("Chemin du fichier de lettres invalide.", nameof(fichierLettres));
 
             if (!File.Exists(fichierLettres))
-                throw new FileNotFoundException($"Fichier de lettres introuvable: {fichierLettres}", fichierLettres);
+                throw new FileNotFoundException($"Fichier de lettres introuvable : {fichierLettres}", fichierLettres);
 
-            // Lecture des contraintes + poids
             int[] maxOccur = new int[26];
             int[] usedOccur = new int[26];
 
@@ -95,17 +110,18 @@ namespace motGlisse
 
                 char lettre = parts[0].Trim().ToUpper()[0];
                 int idx = lettre - 'A';
-                int max = int.Parse(parts[1].Trim());
-                int poids = int.Parse(parts[2].Trim());
+
+                if (!int.TryParse(parts[1].Trim(), out int max))
+                    continue;
+                if (!int.TryParse(parts[2].Trim(), out int poids))
+                    continue;
 
                 maxOccur[idx] = max;
-                if (!poidsLettres.ContainsKey(lettre))
-                    poidsLettres[lettre] = poids;
+                poidsLettres[lettre] = poids;
             }
 
             grille = new char[nbLignes, nbColonnes];
 
-            // Remplissage en respectant les occurrences max
             for (int i = 0; i < nbLignes; i++)
             {
                 for (int j = 0; j < nbColonnes; j++)
@@ -148,6 +164,7 @@ namespace motGlisse
         // -------------------------------------------------
         //                RECHERCHE D'UN MOT
         // -------------------------------------------------
+        // Directions autorisées : →, ←, ↓, ↘, ↙
         public List<(int x, int y)>? Recherche_Mot(string mot)
         {
             if (string.IsNullOrWhiteSpace(mot) || mot.Length < 2)
@@ -155,35 +172,36 @@ namespace motGlisse
 
             mot = mot.Trim().ToUpper();
 
-            (int dx, int dy)[] directions = new (int, int)[]
+            (int dx, int dy)[] directions =
             {
-                (-1, 0), // haut
-                (0, -1), // gauche
-                (0, 1),  // droite
-                (-1, -1),// diagonale haut-gauche
-                (-1, 1)  // diagonale haut-droite
+                (0, 1),   // droite
+                (0, -1),  // gauche
+                (1, 0),   // bas
+                (1, 1),   // diagonale bas-droite
+                (1, -1)   // diagonale bas-gauche
             };
 
-            int ligneBase = nbLignes - 1;
-
-            for (int col = 0; col < nbColonnes; col++)
+            for (int x = 0; x < nbLignes; x++)
             {
-                if (grille[ligneBase, col] != mot[0])
-                    continue;
-
-                foreach (var dir in directions)
+                for (int y = 0; y < nbColonnes; y++)
                 {
-                    List<(int x, int y)> chemin = new List<(int x, int y)>();
+                    if (grille[x, y] != mot[0])
+                        continue;
 
-                    if (RechercheRec(mot, 0, ligneBase, col, dir.dx, dir.dy, chemin))
-                        return chemin;
+                    foreach (var (dx, dy) in directions)
+                    {
+                        List<(int x, int y)> chemin = new List<(int x, int y)>();
+                        if (RechercheRec(mot, 0, x, y, dx, dy, chemin))
+                            return chemin;
+                    }
                 }
             }
 
             return null;
         }
 
-        private bool RechercheRec(string mot, int index, int x, int y, int dx, int dy, List<(int x, int y)> chemin)
+        private bool RechercheRec(string mot, int index, int x, int y,
+                                  int dx, int dy, List<(int x, int y)> chemin)
         {
             if (x < 0 || x >= nbLignes || y < 0 || y >= nbColonnes)
                 return false;
@@ -196,14 +214,7 @@ namespace motGlisse
             if (index == mot.Length - 1)
                 return true;
 
-            int nx = x + dx;
-            int ny = y + dy;
-
-            if (RechercheRec(mot, index + 1, nx, ny, dx, dy, chemin))
-                return true;
-
-            chemin.RemoveAt(chemin.Count - 1);
-            return false;
+            return RechercheRec(mot, index + 1, x + dx, y + dy, dx, dy, chemin);
         }
 
         // -------------------------------------------------
@@ -225,6 +236,7 @@ namespace motGlisse
                     score += 1; // fallback minimal
             }
 
+            // On privilégie les mots longs
             score *= positions.Count;
             return score;
         }
@@ -249,6 +261,7 @@ namespace motGlisse
             {
                 List<char> lettres = new List<char>();
 
+                // on remonte la colonne
                 for (int lig = nbLignes - 1; lig >= 0; lig--)
                 {
                     if (!suppr[lig, col] && grille[lig, col] != ' ' && grille[lig, col] != '\0')
@@ -284,7 +297,7 @@ namespace motGlisse
                 {
                     char c = grille[i, j];
                     if (c == '\0' || c == ' ')
-                        c = '.'; // pour bien voir les cases vides
+                        c = '.';
 
                     sb.Append(c);
                     sb.Append(' ');

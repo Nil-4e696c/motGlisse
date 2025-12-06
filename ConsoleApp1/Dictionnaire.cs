@@ -22,15 +22,50 @@ namespace motGlisse
         {
             string[] lignes = File.ReadAllLines(nomFichier);
 
-            for (int i = 0; i < lignes.Length && i < 26; i++)
+            foreach (string ligne in lignes)
             {
-                string[] mots = lignes[i].Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                if (string.IsNullOrWhiteSpace(ligne))
+                    continue;
+
+                string l = ligne.Trim();
+
+                //
+                // Ton fichier est au format :
+                // 2
+                // AA AH AI AN AS...
+                // 3
+                // AAS ACE ADA...
+                //
+                // Donc : si la ligne contient uniquement un nombre → on SKIP
+                //
+                bool estUnNombre = true;
+                foreach (char c in l)
+                {
+                    if (!char.IsDigit(c))
+                    {
+                        estUnNombre = false;
+                        break;
+                    }
+                }
+                if (estUnNombre)
+                    continue;
+
+                // Ici : la ligne contient une liste de mots
+                string[] mots = l.Split(' ', StringSplitOptions.RemoveEmptyEntries);
 
                 foreach (string mot in mots)
                 {
-                    string m = mot.Trim();
-                    if (m.Length > 0)
-                        tabMotsParLettre[i].Add(m.ToUpper()); // on met tout en majuscules
+                    string m = mot.Trim().ToUpper();
+
+                    if (m.Length == 0)
+                        continue;
+
+                    char first = m[0];
+                    if (first < 'A' || first > 'Z')
+                        continue;
+
+                    int index = first - 'A';
+                    tabMotsParLettre[index].Add(m);
                 }
             }
         }
@@ -82,7 +117,6 @@ namespace motGlisse
                 }
             }
 
-            // Ajouter les restes
             while (i < a.Count) resultat.Add(a[i++]);
             while (j < b.Count) resultat.Add(b[j++]);
 
@@ -98,9 +132,10 @@ namespace motGlisse
                 return false;
 
             mot = mot.Trim().ToUpper();
-
             int index = LettreToIndex(mot[0]);
+
             var liste = tabMotsParLettre[index];
+            if (liste.Count == 0) return false;
 
             return RechDicho(mot, liste, 0, liste.Count - 1);
         }
@@ -111,28 +146,21 @@ namespace motGlisse
                 return false;
 
             int mid = (gauche + droite) / 2;
-
             int cmp = string.Compare(mot, liste[mid], StringComparison.Ordinal);
 
             if (cmp == 0)
                 return true;
             else if (cmp < 0)
-                return RechDicho(mot, liste, gauche, mid - 1);   // récursivité à gauche
+                return RechDicho(mot, liste, gauche, mid - 1);
             else
-                return RechDicho(mot, liste, mid + 1, droite);   // récursivité à droite
+                return RechDicho(mot, liste, mid + 1, droite);
         }
 
-        // ------------------------------
-        //      UTILITAIRE LETTRE -> INDEX
-        // ------------------------------
         private int LettreToIndex(char c)
         {
             return char.ToUpper(c) - 'A';
         }
 
-        // ------------------------------
-        //            TO STRING
-        // ------------------------------
         public override string ToString()
         {
             string s = "";
